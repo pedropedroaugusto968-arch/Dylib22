@@ -7,21 +7,23 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-12
 
     steps:
       - name: Checkout do codigo
         uses: actions/checkout@v4
 
-      - name: Instalar Theos Completo
+      - name: Instalar Theos
         run: |
           export THEOS=~/theos
           git clone --recursive https://github.com/theos/theos.git $THEOS
-          # Baixando SDK de uma fonte alternativa e estável
-          curl -ksL https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz -o ~/iPhoneOS14.5.sdk.tar.xz
-          mkdir -p $THEOS/sdks
-          tar -xf ~/iPhoneOS14.5.sdk.tar.xz -C $THEOS/sdks
           echo "THEOS=$THEOS" >> $GITHUB_ENV
+
+      - name: Usar SDK do Sistema
+        run: |
+          # Usa o SDK nativo do macOS que ja funciona para iOS basico
+          mkdir -p ~/theos/sdks
+          ln -s /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk ~/theos/sdks/iPhoneOS.sdk
 
       - name: Compilando SpaceXit Dylib
         run: |
