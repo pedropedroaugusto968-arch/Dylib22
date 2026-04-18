@@ -13,17 +13,16 @@ jobs:
       - name: Checkout do codigo
         uses: actions/checkout@v4
 
-      - name: Instalar Theos
+      - name: Instalar Theos Completo
         run: |
           export THEOS=~/theos
           git clone --recursive https://github.com/theos/theos.git $THEOS
+          # Baixando SDK de uma fonte alternativa e estável
+          curl -ksL https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz -o ~/iPhoneOS14.5.sdk.tar.xz
+          mkdir -p $THEOS/sdks
+          tar -xf ~/iPhoneOS14.5.sdk.tar.xz -C $THEOS/sdks
           echo "THEOS=$THEOS" >> $GITHUB_ENV
 
-      - name: Instalar SDK corrigido
-        run: |
-          mkdir -p ~/theos/sdks
-          curl -L https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz | tar -xf - -C ~/theos/sdks
-          
       - name: Compilando SpaceXit Dylib
         run: |
           make package FINALPACKAGE=1
