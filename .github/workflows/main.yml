@@ -13,16 +13,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Instalar Theos e SDK
+      - name: Instalar Dependencias
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential git lua5.3 liblua5.3-dev libarchive-dev python3
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          # SDK Fix: Usando link direto e estável
-          curl -LO https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz
+
+      - name: Baixar SDK (Link Alternativo)
+        run: |
           mkdir -p ~/theos/sdks
-          tar -xf iPhoneOS14.5.sdk.tar.xz -C ~/theos/sdks/
-          rm iPhoneOS14.5.sdk.tar.xz
+          # Usando o link do repositório de SDKs pronto
+          curl -ksL https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz -o ~/sdk.tar.xz
+          tar -xf ~/sdk.tar.xz -C ~/theos/sdks/
+          rm ~/sdk.tar.xz
 
       - name: Limpar Formato (Anti-Error 25)
         run: |
@@ -31,7 +34,7 @@ jobs:
           find . -name "*.plist" -exec sed -i 's/\r$//' {} +
           echo "" >> control
 
-      - name: Compilar
+      - name: Compilar Space Xit
         run: |
           export THEOS=~/theos
           export PATH=$THEOS/bin:$PATH
