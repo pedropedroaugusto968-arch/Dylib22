@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout do Código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Instalar Dependências e Theos
         run: |
@@ -24,11 +24,9 @@ jobs:
 
       - name: Corrigir Formato dos Arquivos (Fix Error 25)
         run: |
-          # Remove espaços invisíveis e corrige quebras de linha do Windows
           sed -i 's/\r$//' control
           sed -i 's/\r$//' Makefile
           sed -i 's/\r$//' *.plist
-          # Garante que o arquivo control termine com uma linha vazia (exigência do Theos)
           echo "" >> control
 
       - name: Compilar Tweak (Space Xit)
@@ -38,8 +36,8 @@ jobs:
           make clean
           make package FINALPACKAGE=1
 
-      - name: Upload da Dylib e Deb
-        uses: actions/upload-artifact@v3
+      - name: Upload da Dylib e Deb (v4)
+        uses: actions/upload-artifact@v4
         with:
           name: SpaceXit-Premium-1.123.1
           path: packages/*.deb
