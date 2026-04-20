@@ -7,7 +7,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Preparar ambiente Theos
+      - name: Preparar Theos e SDKs
         run: |
           git clone --recursive https://github.com/theos/theos.git ~/theos
           curl -LO https://github.com/theos/sdks/archive/master.zip
@@ -20,8 +20,8 @@ jobs:
           export THEOS=~/theos
           make package FINALPACKAGE=1
           
-      - name: Upload do Resultado
+      - name: Upload da Dylib
         uses: actions/upload-artifact@v4
         with:
-          name: SucSoft-Gomes-Final
+          name: SucSoft-Gomes-Build
           path: packages/*.deb
