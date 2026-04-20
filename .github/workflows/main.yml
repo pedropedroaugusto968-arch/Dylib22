@@ -6,15 +6,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Instalar Theos
+
+      - name: Preparar ambiente Theos
         run: |
           git clone --recursive https://github.com/theos/theos.git ~/theos
+          curl -LO https://github.com/theos/sdks/archive/master.zip
+          unzip master.zip -d ~/theos/sdks
+          mv ~/theos/sdks/sdks-master/* ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
+
       - name: Compilar Dylib
         run: |
-          make package
-      - name: Upload da Dylib
+          export THEOS=~/theos
+          make package FINALPACKAGE=1
+          
+      - name: Upload do Resultado
         uses: actions/upload-artifact@v4
         with:
-          name: SucSoft-iOS-Gomes
+          name: SucSoft-Gomes-Final
           path: packages/*.deb
