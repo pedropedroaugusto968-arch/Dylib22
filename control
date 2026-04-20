@@ -1,0 +1,9 @@
+Package: com.sucsoft.ffh4x
+Name: SucSoft FFH4X Pro
+Depends: mobilesubstrate
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: Painel Regedit Premium by Gomes
+Maintainer: Gomes - SucSoft
+Author: Gomes
+Section: Tweaks
