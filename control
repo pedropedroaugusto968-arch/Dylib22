@@ -1,9 +1,10 @@
-Package: com.sucsoft.ffh4x
-Name: SucSoftFFH4X
+Package: com.spacexit.premium
+Name: Space Xit - Mod Streamer
 Depends: mobilesubstrate
-Version: 1.0.0
+Version: 2.0.1
 Architecture: iphoneos-arm
-Description: Painel Premium Anti-Blacklist
-Maintainer: Gomes
-Author: Gomes
+Description: Bypass Total, Anti-Blacklist e Modo Streamer (Invisível em Gravações)
+Maintainer: Gomes (@eoo_gomes3)
+Author: Space Xit
 Section: Tweaks
+v
