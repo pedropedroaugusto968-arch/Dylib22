@@ -1,6 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <substrate.h>
 
+// --- INTERFACE DO MENU SPACE XIT ---
 @interface SpaceXitMenu : UIWindow
 @property (nonatomic, strong) UIView *mainPanel;
 @property (nonatomic, strong) UIView *contentArea;
@@ -19,7 +20,8 @@
         instance.windowLevel = UIWindowLevelStatusBar + 100.0;
         instance.backgroundColor = [UIColor clearColor];
         instance.hidden = YES;
-        // MODO STREAMER: Oculto em gravações
+        
+        // MODO STREAMER: Oculta o menu de prints e vídeos
         if ([instance respondsToSelector:@selector(setScreenRecordingDetached:)]) {
             [instance setValue:@(YES) forKey:@"screenRecordingDetached"];
         }
@@ -30,6 +32,7 @@
 - (void)setupUI {
     if (self.mainPanel) return;
 
+    // Container Principal
     self.mainPanel = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 400, 280)];
     self.mainPanel.center = self.center;
     self.mainPanel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.95];
@@ -38,7 +41,15 @@
     self.mainPanel.layer.borderColor = [UIColor cyanColor].CGColor;
     [self addSubview:self.mainPanel];
 
-    // Abas
+    // Título
+    UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(0, 5, 400, 25)];
+    title.text = @"SPACE XIT - SUPREME V4";
+    title.textColor = [UIColor cyanColor];
+    title.textAlignment = NSTextAlignmentCenter;
+    title.font = [UIFont boldSystemFontOfSize:16];
+    [self.mainPanel addSubview:title];
+
+    // Sistema de Abas
     NSArray *tabs = @[@"COMBATE", @"ESP", @"CONFIG"];
     for (int i = 0; i < tabs.count; i++) {
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -52,11 +63,13 @@
         [self.mainPanel addSubview:btn];
     }
 
+    // Área de Funções
     self.contentArea = [[UIView alloc] initWithFrame:CGRectMake(10, 80, 380, 185)];
     self.contentArea.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.05];
     self.contentArea.layer.cornerRadius = 8;
     [self.mainPanel addSubview:self.contentArea];
-    [self showCombate];
+    
+    [self showCombate]; // Aba Inicial
 }
 
 - (void)switchTab:(UIButton *)sender {
@@ -70,6 +83,7 @@
     UILabel *l = [[UILabel alloc] initWithFrame:CGRectMake(15, 10, 200, 30)];
     l.text = @"ATIVAR AIMBOT"; l.textColor = [UIColor whiteColor];
     [self.contentArea addSubview:l];
+    
     UISwitch *sw = [[UISwitch alloc] initWithFrame:CGRectMake(310, 5, 0, 0)];
     sw.onTintColor = [UIColor cyanColor];
     [self.contentArea addSubview:sw];
@@ -100,7 +114,7 @@
 
 - (void)showConfig {
     UITextView *txt = [[UITextView alloc] initWithFrame:CGRectMake(10, 5, 360, 150)];
-    txt.text = @"SPACE XIT - OFICIAL\nCONTATO: @eoo_gomes3\n\nBYPASS DE LOGIN ATIVO\nVERSÃO SUPREMA 1.123.1";
+    txt.text = @"SPACE XIT - OFICIAL\nDEV: @eoo_gomes3\n\nSTATUS: 1.123.1 ATUALIZADO\n\nINSTRUÇÕES:\n- Ative no Lobby após os 25s.\n- 3 Cliques com 3 Dedos para abrir.";
     txt.textColor = [UIColor cyanColor];
     txt.backgroundColor = [UIColor clearColor];
     txt.editable = NO;
@@ -118,12 +132,14 @@
 }
 @end
 
+// --- ATIVAÇÃO DO GESTO ---
 %ctor {
     [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
-        // Bypass de 25 segundos para segurança
+        // Bypass de espera para evitar detecção no boot
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitMenu sharedInstance] action:@selector(toggle)];
-            tap.numberOfTouchesRequired = 3; tap.numberOfTapsRequired = 3;
+            tap.numberOfTouchesRequired = 3; 
+            tap.numberOfTapsRequired = 3;
             [[UIApplication sharedApplication].keyWindow addGestureRecognizer:tap];
         });
     }];
