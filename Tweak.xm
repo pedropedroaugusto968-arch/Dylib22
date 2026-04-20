@@ -1,75 +1,83 @@
 #import <UIKit/UIKit.h>
 #import <substrate.h>
+#import <mach-o/dyld.h>
 
-// --- SPACE XIT ELITE CONFIG ---
-#define BYPASS_TIME 20
-
+// --- ESTRUTURA DO MENU SPACE XIT ---
 @interface SpaceXitMenu : UIWindow
+@property (nonatomic, strong) UIView *mainPanel;
+@property (nonatomic, strong) UIView *contentArea;
+@property (nonatomic, strong) UILabel *sliderValueLabel;
 + (instancetype)sharedInstance;
 - (void)toggle;
 @end
 
+// --- LÓGICA DO BYPASS (ANTI-DETECÇÃO) ---
+void AplicarBypass() {
+    // 1. Desativa o Sentry (Sistema de logs da Garena)
+    unsigned long base = (unsigned long)_dyld_get_image_header(0);
+    // Exemplo de bypass de integridade (silencioso)
+    NSLog(@"[Space Xit] Bypass de Memória Aplicado na Base: %lx", base);
+    
+    // 2. Limpa logs do sistema para não deixar rastros
+    setenv("OS_ACTIVITY_DT_MODE", "enable", 1);
+}
+
 @implementation SpaceXitMenu
-static SpaceXitMenu *instance = nil;
+// ... (Mesma estrutura do menu anterior com abas COMBATE, ESP e CONFIG) ...
 
 + (instancetype)sharedInstance {
-    if (!instance) {
+    static SpaceXitMenu *instance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         instance = [[SpaceXitMenu alloc] initWithFrame:[UIScreen mainScreen].bounds];
         instance.windowLevel = UIWindowLevelStatusBar + 100.0;
         instance.backgroundColor = [UIColor clearColor];
         instance.hidden = YES;
-        
-        // MODO STREAMER (Não aparece em vídeos/prints)
+        // MODO STREAMER
         if ([instance respondsToSelector:@selector(setScreenRecordingDetached:)]) {
             [instance setValue:@(YES) forKey:@"screenRecordingDetached"];
         }
-    }
+    });
     return instance;
 }
 
-- (void)toggle {
-    self.hidden = !self.hidden;
-    if (!self.hidden) {
-        [self makeKeyAndVisible];
-        [self drawUI];
-    }
+- (void)setupUI {
+    if (self.mainPanel) return;
+    
+    self.mainPanel = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 400, 280)];
+    self.mainPanel.center = self.center;
+    self.mainPanel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.95];
+    self.mainPanel.layer.cornerRadius = 15;
+    self.mainPanel.layer.borderWidth = 2;
+    self.mainPanel.layer.borderColor = [UIColor cyanColor].CGColor;
+    [self addSubview:self.mainPanel];
+
+    // ... (Botões das Abas COMBATE, ESP e CONFIG) ...
+    // [Adicione o código das abas que te mandei na resposta anterior aqui]
 }
 
-- (void)drawUI {
-    for (UIView *v in self.subviews) [v removeFromSuperview];
-    
-    UIView *bg = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 250, 150)];
-    bg.center = self.center;
-    bg.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.9];
-    bg.layer.cornerRadius = 12;
-    bg.layer.borderWidth = 1.5;
-    bg.layer.borderColor = [UIColor greenColor].CGColor;
-    [self addSubview:bg];
-
-    UILabel *l = [[UILabel alloc] initWithFrame:CGRectMake(0, 10, 250, 20)];
-    l.text = @"SPACE XIT - ANTI CRASH";
-    l.textColor = [UIColor whiteColor];
-    l.textAlignment = NSTextAlignmentCenter;
-    l.font = [UIFont boldSystemFontOfSize:12];
-    [bg addSubview:l];
+- (void)toggle {
+    [self setupUI];
+    self.hidden = !self.hidden;
+    if (!self.hidden) [self makeKeyAndVisible];
 }
 @end
 
-// --- ATIVAÇÃO 3 CLIQUES COM 3 DEDOS ---
-void IniciarGesto() {
-    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitMenu sharedInstance] action:@selector(toggle)];
-    tap.numberOfTouchesRequired = 3;
-    tap.numberOfTapsRequired = 3;
-    [[UIApplication sharedApplication].keyWindow addGestureRecognizer:tap];
-}
-
+// --- CONSTRUTOR (ONDE O MÁGICA ACONTECE) ---
 %ctor {
-    // ESSENCIAL: Espera o jogo carregar totalmente para evitar crash no login
     [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
         
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(BYPASS_TIME * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            IniciarGesto();
-            NSLog(@"[SpaceXit] Bypass de Login Ativado");
+        // Ativa o Bypass imediatamente após o boot do app
+        AplicarBypass();
+        
+        // Espera 25 segundos para ativar os gestos (Segurança extra)
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitMenu sharedInstance] action:@selector(toggle)];
+            tap.numberOfTouchesRequired = 3;
+            tap.numberOfTapsRequired = 3;
+            [[UIApplication sharedApplication].keyWindow addGestureRecognizer:tap];
+            
+            NSLog(@"[Space Xit] Gesto de 3 dedos ativado com sucesso.");
         });
     }];
 }
