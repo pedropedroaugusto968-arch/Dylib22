@@ -7,11 +7,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Instalar Dependencias (ldid e dpkg)
-        run: |
-          brew install ldid dpkg
+      - name: Instalar Dependencias
+        run: brew install ldid dpkg
 
-      - name: Preparar Theos e SDKs
+      - name: Corrigir Formato Unix
+        run: |
+          sed -i '' 's/\r$//' control
+          chmod 644 control
+
+      - name: Preparar Theos
         run: |
           git clone --recursive https://github.com/theos/theos.git ~/theos
           curl -LO https://github.com/theos/sdks/archive/master.zip
@@ -27,5 +31,5 @@ jobs:
       - name: Upload do Resultado
         uses: actions/upload-artifact@v4
         with:
-          name: SucSoft-Gomes-Build
+          name: SucSoft-Final-Gomes
           path: packages/*.deb
