@@ -39,7 +39,7 @@
     NSArray *tabs = @[@"COMBATE", @"ESP", @"INFO"];
     for (int i = 0; i < tabs.count; i++) {
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeSystem];
-        btn.frame = CGRectMake(10 + (i * 120), 30, 115, 30);
+        btn.frame = CGRectMake(10 + (i * 120), 35, 115, 30);
         [btn setTitle:tabs[i] forState:UIControlStateNormal];
         [btn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         btn.backgroundColor = [[UIColor grayColor] colorWithAlphaComponent:0.3];
@@ -48,7 +48,6 @@
         [btn addTarget:self action:@selector(switchTab:) forControlEvents:UIControlEventTouchUpInside];
         [self.mainPanel addSubview:btn];
     }
-
     self.contentArea = [[UIView alloc] initWithFrame:CGRectMake(10, 70, 360, 175)];
     [self.mainPanel addSubview:self.contentArea];
     [self showCombate];
@@ -67,12 +66,9 @@
     [self.contentArea addSubview:l];
     UISwitch *sw = [[UISwitch alloc] initWithFrame:CGRectMake(300, 5, 0, 0)];
     [self.contentArea addSubview:sw];
-
     self.sliderLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 50, 300, 20)];
-    self.sliderLabel.text = @"DISTÂNCIA: 250";
-    self.sliderLabel.textColor = [UIColor cyanColor];
+    self.sliderLabel.text = @"FOV: 250"; self.sliderLabel.textColor = [UIColor cyanColor];
     [self.contentArea addSubview:self.sliderLabel];
-
     UISlider *sd = [[UISlider alloc] initWithFrame:CGRectMake(10, 75, 340, 30)];
     sd.minimumValue = 0; sd.maximumValue = 500; sd.value = 250;
     [sd addTarget:self action:@selector(sdChange:) forControlEvents:UIControlEventValueChanged];
@@ -80,7 +76,7 @@
 }
 
 - (void)showESP {
-    NSArray *ops = @[@"LINHA V4", @"BOX V4", @"DISTANCIA"];
+    NSArray *ops = @[@"LINHA V4", @"BOX V4", @"NOME"];
     for (int i = 0; i < ops.count; i++) {
         UILabel *l = [[UILabel alloc] initWithFrame:CGRectMake(10, 10 + (i * 45), 200, 25)];
         l.text = ops[i]; l.textColor = [UIColor whiteColor];
@@ -92,13 +88,13 @@
 
 - (void)showInfo {
     UITextView *tv = [[UITextView alloc] initWithFrame:CGRectMake(5, 5, 350, 160)];
-    tv.text = @"SPACE XIT V4\nDev: @eoo_gomes3\nStatus: 1.123.1 ON\n\n- 3 toques com 3 dedos para abrir.";
+    tv.text = @"SPACE XIT V4\nDev: @eoo_gomes3\n\n- 3 Dedos / 3 Toques";
     tv.textColor = [UIColor cyanColor]; tv.backgroundColor = [UIColor clearColor]; tv.editable = NO;
     [self.contentArea addSubview:tv];
 }
 
 - (void)sdChange:(UISlider *)s {
-    self.sliderLabel.text = [NSString stringWithFormat:@"DISTÂNCIA: %d", (int)s.value];
+    self.sliderLabel.text = [NSString stringWithFormat:@"FOV: %d", (int)s.value];
 }
 
 - (void)toggle { [self setupUI]; self.hidden = !self.hidden; if (!self.hidden) [self makeKeyAndVisible]; }
