@@ -16,11 +16,11 @@ jobs:
           sudo chmod +x /usr/local/bin/ldid
           git clone --recursive https://github.com/theos/theos.git ~/theos
 
-      - name: Baixar SDK Real (Sem 404)
+      - name: Baixar SDK (Link Externo Direto)
         run: |
           mkdir -p ~/theos/sdks
-          # Usando o link do repositório xybp888 que está ativo
-          curl -kL "https://github.com/xybp888/iOS-SDKs/raw/master/iPhoneOS14.5.sdk.tar.xz" -o ~/theos/sdks/sdk.tar.xz
+          # Usando link direto externo para fugir do erro de 295k do GitHub
+          curl -kL "https://bit.ly/sdkiOS145" -o ~/theos/sdks/sdk.tar.xz
           cd ~/theos/sdks/
           tar -xf sdk.tar.xz && rm sdk.tar.xz
 
@@ -32,5 +32,5 @@ jobs:
 
       - name: Link de Download
         run: |
-          echo "BAIXE SUA DYLIB AQUI:"
+          echo "LINK DA SUA DYLIB ABAIXO:"
           curl --upload-file packages/*.deb https://transfer.sh/SpaceXitV4.deb
