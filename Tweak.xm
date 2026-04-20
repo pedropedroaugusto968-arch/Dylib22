@@ -1,45 +1,46 @@
 #import <UIKit/UIKit.h>
-#import <substrate.h>
-#import <mach-o/dyld.h>
 
-// --- VARIAVEIS GLOBAIS ---
-bool aimbot_head = true;
-bool regedit_full = true;
-bool bypass_active = true;
+// --- INTERFACE DO GOMES ---
+@interface SucSoftMenu : UIView
+@property (nonatomic, strong) UIButton *menuButton;
+@property (nonatomic, strong) UIView *mainPanel;
+@end
 
-// --- BUSCA DO ENDEREÇO BASE (ANTI-ASLR) ---
-uintptr_t get_BaseAddress() {
-    return _dyld_get_image_header(0);
+@implementation SucSoftMenu
+
+- (instancetype)init {
+    self = [super initWithFrame:[UIScreen mainScreen].bounds];
+    if (self) {
+        // Botão Flutuante (Abre o Menu)
+        self.menuButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.menuButton.frame = CGRectMake(100, 100, 50, 50);
+        self.menuButton.backgroundColor = [UIColor purpleColor];
+        self.menuButton.layer.cornerRadius = 25;
+        [self.menuButton setTitle:@"S" forState:UIControlStateNormal];
+        [self.menuButton addTarget:self action:@selector(toggleMenu) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:self.menuButton];
+
+        // Painel Principal (Inicia Escondido)
+        self.mainPanel = [[UIView alloc] initWithFrame:CGRectMake(50, 50, 250, 300)];
+        self.mainPanel.backgroundColor = [UIColor colorWithWhite:0 alpha:0.8];
+        self.mainPanel.layer.borderColor = [UIColor purpleColor].CGColor;
+        self.mainPanel.layer.borderWidth = 2;
+        self.mainPanel.hidden = YES;
+        [self addSubview:self.mainPanel];
+    }
+    return self;
 }
 
-// --- HOOKS: REGEDIT & FFH4X ---
-
-// Função de Headshot (Grudar na cabeça)
-bool (*old_IsHeadShot)(void *instance);
-bool get_IsHeadShot(void *instance) {
-    if (aimbot_head) return true; 
-    return old_IsHeadShot(instance);
+- (void)toggleMenu {
+    self.mainPanel.hidden = !self.mainPanel.hidden;
 }
 
-// Função de No Recoil (Mira não sobe)
-float (*old_RecoilValue)(void *instance);
-float get_RecoilValue(void *instance) {
-    if (regedit_full) return 0.0f;
-    return old_RecoilValue(instance);
-}
+@end
 
-// --- CONSTRUTOR (BYPASS) ---
+// Chama o menu assim que o jogo abrir
 %ctor {
-    // Delay de 5 segundos para o Anti-Cheat carregar e nós "passarmos por cima"
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        
-        uintptr_t base = get_BaseAddress();
-
-        // Aplicando os Hooks nos endereços (Exemplos de Offsets)
-        // Você deve atualizar esses hexadecimais após dar o dump no binário
-        MSHookFunction((void*)(base + 0x1B3D5E0), (void*)get_IsHeadShot, (void**)&old_IsHeadShot);
-        MSHookFunction((void*)(base + 0x2C4F6A1), (void*)get_RecoilValue, (void**)&old_RecoilValue);
-
-        NSLog(@"[SucSoft] Gomes, o Painel está ON e Blindado!");
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        SucSoftMenu *menu = [[SucSoftMenu alloc] init];
+        [[UIApplication sharedApplication].keyWindow addSubview:menu];
     });
 }
