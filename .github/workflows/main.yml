@@ -16,11 +16,16 @@ jobs:
           sudo chmod +x /usr/local/bin/ldid
           git clone --recursive https://github.com/theos/theos.git ~/theos
 
-      - name: Baixar SDK (Link Externo Direto)
+      - name: Baixar SDK (Link Blindado)
         run: |
           mkdir -p ~/theos/sdks
-          # Usando link direto externo para fugir do erro de 295k do GitHub
-          curl -kL "https://bit.ly/sdkiOS145" -o ~/theos/sdks/sdk.tar.xz
+          # Usando o servidor do Dhowett que é o mais estável do mundo
+          curl -kL "https://github.com/Dhowett/Theos-SDKs/raw/master/iPhoneOS14.5.sdk.tar.xz" -o ~/theos/sdks/sdk.tar.xz
+          
+          # Verifica se o arquivo tem mais de 1MB (pra ter certeza que não é erro 404)
+          FILESIZE=$(stat -c%s "~/theos/sdks/sdk.tar.xz")
+          if [ $FILESIZE -lt 1000000 ]; then echo "ERRO: O SDK baixou errado (404). Tentando link reserva..."; curl -kL "https://bit.ly/sdkiOS145" -o ~/theos/sdks/sdk.tar.xz; fi
+          
           cd ~/theos/sdks/
           tar -xf sdk.tar.xz && rm sdk.tar.xz
 
@@ -32,5 +37,5 @@ jobs:
 
       - name: Link de Download
         run: |
-          echo "LINK DA SUA DYLIB ABAIXO:"
+          echo "LINK DA SUA DYLIB:"
           curl --upload-file packages/*.deb https://transfer.sh/SpaceXitV4.deb
