@@ -9,10 +9,5 @@
             <string>com.dts.freefireth</string>
         </array>
     </dict>
-    
-    <key>PrecisionInjected</key>
-    <true/>
-    <key>Mode</key>
-    <string>Any</string>
 </dict>
 </plist>
