@@ -1,9 +1,9 @@
 Package: com.spacexit.supreme
-Name: Space Xit - Supreme VIP
+Name: Space Xit VIP
 Depends: mobilesubstrate
 Version: 2.5.0
 Architecture: iphoneos-arm
-Description: Menu VIP com Abas (Combate, ESP, Config), Modo Streamer e Bypass Total.
+Description: Menu VIP com Abas e Bypass.
 Maintainer: Gomes (@eoo_gomes3)
 Author: Space Xit
 Section: Tweaks
