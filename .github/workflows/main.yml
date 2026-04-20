@@ -16,14 +16,14 @@ jobs:
       - name: Instalar Dependencias
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git lua5.3 liblua5.3-dev libarchive-dev python3
+          sudo apt-get install -y build-essential git lua5.3 liblua5.3-dev libarchive-dev python3 wget
           git clone --recursive https://github.com/theos/theos.git ~/theos
 
-      - name: Baixar SDK V4 (LINK ALTERNATIVO)
+      - name: Baixar SDK V4 (Link Alternativo Direto)
         run: |
           mkdir -p ~/theos/sdks
-          # Usando link direto de backup para evitar os 295k de erro
-          curl -kL "https://github.com/xybp888/iOS-SDKs/raw/master/iPhoneOS14.5.sdk.tar.xz" -o ~/sdk.tar.xz
+          # Wget com retry para garantir que baixe os 100MB e não 295k
+          wget --no-check-certificate -c "https://github.com/xybp888/iOS-SDKs/raw/master/iPhoneOS14.5.sdk.tar.xz" -O ~/sdk.tar.xz
           tar -xf ~/sdk.tar.xz -C ~/theos/sdks/
           rm ~/sdk.tar.xz
 
