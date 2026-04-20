@@ -1,14 +1,15 @@
-# Nome do projeto
+# Nome do projeto (deve ser o mesmo do seu .plist)
 TWEAK_NAME = SucSoftFFH4X
 
-# Arquivos que serão compilados
+# Arquivos que serão compilados (o menu com abas)
 SucSoftFFH4X_FILES = Tweak.xm
-SucSoftFFH4X_CFLAGS = -fobjc-arc -O3 # -O3 garante o máximo de performance/sem lag
+# Ativa o ARC (essencial para o menu com abas não crashar)
+SucSoftFFH4X_CFLAGS = -fobjc-arc -O3
 
-# Frameworks necessários para o Menu e Mod Streamer
-SucSoftFFH4X_FRAMEWORKS = UIKit QuartzCore CoreGraphics
+# Frameworks que desenham o menu e as abas na tela
+SucSoftFFH4X_FRAMEWORKS = UIKit QuartzCore CoreGraphics Foundation
 
-# Arquiteturas suportadas (foco total em iPhone 6s até o 16 Pro Max)
+# Arquiteturas para rodar do iPhone 7 ao 16 Pro Max
 ARCHS = arm64 arm64e
 
 include $(THEOS)/makefiles/common.mk
