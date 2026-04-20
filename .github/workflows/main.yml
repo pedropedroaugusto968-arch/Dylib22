@@ -8,15 +8,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup
+      - name: Setup (Corrigido)
         run: |
-          sudo apt-get update && sudo apt-get install -y build-essential git dpkg-dev ldid xz-utils
+          sudo apt-get update
+          sudo apt-get install -y build-essential git dpkg-dev xz-utils
+          # Instalando ldid manualmente para evitar o erro 100
+          sudo curl -kL "https://github.com/theos/binaries/raw/master/linux/x86_64/ldid" -o /usr/local/bin/ldid
+          sudo chmod +x /usr/local/bin/ldid
+          
           git clone --recursive https://github.com/theos/theos.git ~/theos
 
       - name: Baixar SDK (Link Novo e Reserva)
         run: |
           mkdir -p ~/theos/sdks
-          # Tenta o link 1, se der erro tenta o link 2
           curl -kL "https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz" -o ~/theos/sdks/sdk.tar.xz || \
           curl -kL "https://github.com/Dhowett/Theos-SDKs/raw/master/iPhoneOS14.5.sdk.tar.xz" -o ~/theos/sdks/sdk.tar.xz
           
