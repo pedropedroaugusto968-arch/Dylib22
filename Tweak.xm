@@ -88,7 +88,7 @@
 
 - (void)showInfo {
     UITextView *tv = [[UITextView alloc] initWithFrame:CGRectMake(5, 5, 350, 160)];
-    tv.text = @"SPACE XIT V4\nDev: @eoo_gomes3\n\n- 3 Dedos / 3 Toques";
+    tv.text = @"SPACE XIT V4\nDev: @eoo_gomes3\n\n- Anti-Crash Login Ativo\n- 3 Dedos / 3 Toques no Lobby";
     tv.textColor = [UIColor cyanColor]; tv.backgroundColor = [UIColor clearColor]; tv.editable = NO;
     [self.contentArea addSubview:tv];
 }
@@ -105,18 +105,33 @@
 @end
 
 %ctor {
-    [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *n) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            UIWindow *keyWindow = nil;
-            for (UIWindow *window in [UIApplication sharedApplication].windows) {
-                if (window.isKeyWindow) {
-                    keyWindow = window;
-                    break;
+    // Aumentamos o tempo para 60 segundos para cobrir o tempo de login manual
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(60 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitV4 sharedInstance] action:@selector(toggle)];
+        tapGesture.numberOfTouchesRequired = 3; 
+        tapGesture.numberOfTapsRequired = 3;
+        
+        // Bloqueia a injeção se houver uma tela de login externa aberta (Safari/Webview)
+        UIWindow *targetWindow = nil;
+        if (@available(iOS 13.0, *)) {
+            for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
+                if (scene.activationState == UISceneActivationStateForegroundActive) {
+                    // Pega a janela que não seja uma sobreposição de sistema (como o teclado ou login)
+                    for (UIWindow *window in scene.windows) {
+                        if (window.isKeyWindow && ![window.description containsString:@"Remote"]) {
+                            targetWindow = window;
+                            break;
+                        }
+                    }
                 }
             }
-            UITapGestureRecognizer *t = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitV4 sharedInstance] action:@selector(toggle)];
-            t.numberOfTouchesRequired = 3; t.numberOfTapsRequired = 3;
-            [keyWindow addGestureRecognizer:t];
-        });
-    }];
+        }
+        
+        if (!targetWindow) targetWindow = [UIApplication sharedApplication].keyWindow;
+
+        if (targetWindow) {
+            [targetWindow addGestureRecognizer:tapGesture];
+        }
+    });
 }
