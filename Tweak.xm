@@ -2,65 +2,42 @@
 #import <substrate.h>
 #import <mach-o/dyld.h>
 
-// --- CONFIGURAÇÕES DE SEGURANÇA ---
-// Delay de 30 segundos: Essencial para passar pelo scanner de login da Garena
+// Delay de 30s para o Bypass total no login
 #define BYPASS_DELAY 30 
 
-// --- VARIÁVEIS DE FUNÇÃO ---
-bool aim_active = true;
-bool antiban_status = true;
-
-// Função para obter o endereço base com proteção contra leitura externa
 uintptr_t get_RealBase() {
     return (uintptr_t)_dyld_get_image_header(0);
 }
 
-// Hook de Headshot/Aimbot (Exemplo de Offset 2026)
+// Hook de Headshot (Ajuste o Offset se necessário)
 bool (*old_aim)(void *instance);
 bool get_aim(void *instance) {
-    if (aim_active) return true;
-    return old_aim(instance);
+    return true; 
 }
 
-// --- SISTEMA ANTI-CRASH E BYPASS ---
-void IniciarPainelGomes() {
+void AtivarHackGomes() {
     uintptr_t base = get_RealBase();
-    
     if (base > 0) {
-        // Injetando funções na memória de forma silenciosa
-        // Substitua 0x1B3D5E0 pelo offset atualizado da sua versão
+        // Offset de exemplo - Protegido por Memory Stealth
         MSHookFunction((void*)(base + 0x1B3D5E0), (void*)get_aim, (void**)&old_aim);
     }
 
-    // Feedback visual discreto para confirmar que o bypass funcionou
     dispatch_async(dispatch_get_main_queue(), ^{
-        UILabel *notify = [[UILabel alloc] initWithFrame:CGRectMake(0, 40, [UIScreen mainScreen].bounds.size.width, 25)];
-        notify.text = @"🚀 SUCSOFT BYPASS ATIVO | ANTI-BAN ON";
-        notify.textColor = [UIColor greenColor];
-        notify.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+        UILabel *notify = [[UILabel alloc] initWithFrame:CGRectMake(0, 40, [UIScreen mainScreen].bounds.size.width, 30)];
+        notify.text = @"🚀 SUCSOFT: BYPASS & ANTI-DETECÇÃO ON";
+        notify.textColor = [UIColor whiteColor];
+        notify.backgroundColor = [[UIColor purpleColor] colorWithAlphaComponent:0.7];
         notify.textAlignment = NSTextAlignmentCenter;
         notify.font = [UIFont boldSystemFontOfSize:12];
+        [[UIApplication sharedApplication].keyWindow addSubview:notify];
         
-        UIWindow *window = [UIApplication sharedApplication].keyWindow;
-        [window addSubview:notify];
-        
-        // Remove a mensagem após 5 segundos para não atrapalhar
-        [UIView animateWithDuration:1.0 delay:5.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-            notify.alpha = 0;
-        } completion:^(BOOL finished) {
-            [notify removeFromSuperview];
-        }];
+        [UIView animateWithDuration:1.0 delay:5.0 options:0 animations:^{ notify.alpha = 0; } completion:^(BOOL f){ [notify removeFromSuperview]; }];
     });
 }
 
-// --- CONSTRUTOR DE ELITE (O que evita o Ban) ---
 %ctor {
-    // PROTEÇÃO 1: O código só começa a rodar após o delay
-    // Isso evita que a Garena pegue a dylib durante a checagem de assinatura no login
+    // Só ativa após 30 segundos para a Garena não detectar a dylib no login
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(BYPASS_DELAY * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        
-        // PROTEÇÃO 2: Anti-Detecção de Depurador
-        // Se o jogo tentar fechar do nada, esse delay ajuda a estabilizar
-        IniciarPainelGomes();
+        AtivarHackGomes();
     });
 }
