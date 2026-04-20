@@ -19,11 +19,11 @@ jobs:
           sudo apt-get install -y build-essential git lua5.3 liblua5.3-dev libarchive-dev python3
           git clone --recursive https://github.com/theos/theos.git ~/theos
 
-      - name: Baixar SDK (Link de Backup)
+      - name: Baixar SDK (Link Blindado)
         run: |
           mkdir -p ~/theos/sdks
-          # Usando link do repositório secundário para evitar o bloqueio de 295k
-          curl -ksL https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz -o ~/sdk.tar.xz
+          # Usando o link do Kabir (Esse não baixa só 295k)
+          curl -ksL https://github.com/KabirSyan/theos-sdks/raw/master/iPhoneOS14.5.sdk.tar.xz -o ~/sdk.tar.xz
           tar -xf ~/sdk.tar.xz -C ~/theos/sdks/
           rm ~/sdk.tar.xz
 
