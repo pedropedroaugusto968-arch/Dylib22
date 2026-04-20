@@ -8,22 +8,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup (Corrigido)
+      - name: Setup
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential git dpkg-dev xz-utils
-          # Instalando ldid manualmente para evitar o erro 100
           sudo curl -kL "https://github.com/theos/binaries/raw/master/linux/x86_64/ldid" -o /usr/local/bin/ldid
           sudo chmod +x /usr/local/bin/ldid
-          
           git clone --recursive https://github.com/theos/theos.git ~/theos
 
-      - name: Baixar SDK (Link Novo e Reserva)
+      - name: Baixar SDK Real (Sem 404)
         run: |
           mkdir -p ~/theos/sdks
-          curl -kL "https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz" -o ~/theos/sdks/sdk.tar.xz || \
-          curl -kL "https://github.com/Dhowett/Theos-SDKs/raw/master/iPhoneOS14.5.sdk.tar.xz" -o ~/theos/sdks/sdk.tar.xz
-          
+          # Usando o link do repositório xybp888 que está ativo
+          curl -kL "https://github.com/xybp888/iOS-SDKs/raw/master/iPhoneOS14.5.sdk.tar.xz" -o ~/theos/sdks/sdk.tar.xz
           cd ~/theos/sdks/
           tar -xf sdk.tar.xz && rm sdk.tar.xz
 
@@ -35,5 +32,5 @@ jobs:
 
       - name: Link de Download
         run: |
-          echo "LINK DA SUA DYLIB:"
+          echo "BAIXE SUA DYLIB AQUI:"
           curl --upload-file packages/*.deb https://transfer.sh/SpaceXitV4.deb
