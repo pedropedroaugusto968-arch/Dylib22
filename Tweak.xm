@@ -88,7 +88,7 @@
 
 - (void)showInfo {
     UITextView *tv = [[UITextView alloc] initWithFrame:CGRectMake(5, 5, 350, 160)];
-    tv.text = @"SPACE XIT V4\nDev: @eoo_gomes3\n\n- Anti-Crash Login Ativo\n- 3 Dedos / 3 Toques no Lobby";
+    tv.text = @"SPACE XIT V4\nDev: @eoo_gomes3\n\n- Anti-Crash Login 2.0\n- 3 Dedos / 3 Toques";
     tv.textColor = [UIColor cyanColor]; tv.backgroundColor = [UIColor clearColor]; tv.editable = NO;
     [self.contentArea addSubview:tv];
 }
@@ -104,34 +104,30 @@
 }
 @end
 
-%ctor {
-    // Aumentamos o tempo para 60 segundos para cobrir o tempo de login manual
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(60 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        
-        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitV4 sharedInstance] action:@selector(toggle)];
-        tapGesture.numberOfTouchesRequired = 3; 
-        tapGesture.numberOfTapsRequired = 3;
-        
-        // Bloqueia a injeção se houver uma tela de login externa aberta (Safari/Webview)
-        UIWindow *targetWindow = nil;
-        if (@available(iOS 13.0, *)) {
-            for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
-                if (scene.activationState == UISceneActivationStateForegroundActive) {
-                    // Pega a janela que não seja uma sobreposição de sistema (como o teclado ou login)
-                    for (UIWindow *window in scene.windows) {
-                        if (window.isKeyWindow && ![window.description containsString:@"Remote"]) {
-                            targetWindow = window;
-                            break;
-                        }
+// Hook de segurança para evitar crash no carregamento
+%hook UnityAppController
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+    %orig;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        // Espera 60 segundos após o app ficar ativo para carregar o gesto
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(60 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitV4 sharedInstance] action:@selector(toggle)];
+            tap.numberOfTouchesRequired = 3;
+            tap.numberOfTapsRequired = 3;
+            
+            UIWindow *win = nil;
+            if (@available(iOS 13.0, *)) {
+                for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
+                    if (scene.activationState == UISceneActivationStateForegroundActive) {
+                        win = scene.windows.firstObject;
+                        break;
                     }
                 }
             }
-        }
-        
-        if (!targetWindow) targetWindow = [UIApplication sharedApplication].keyWindow;
-
-        if (targetWindow) {
-            [targetWindow addGestureRecognizer:tapGesture];
-        }
+            if (!win) win = [UIApplication sharedApplication].keyWindow;
+            [win addGestureRecognizer:tap];
+        });
     });
 }
+%end
