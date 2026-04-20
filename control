@@ -1,10 +1,9 @@
-Package: com.spacexit.premium
-Name: Space Xit - Mod Streamer
+Package: com.spacexit.supreme
+Name: Space Xit - Supreme VIP
 Depends: mobilesubstrate
-Version: 2.0.1
+Version: 2.5.0
 Architecture: iphoneos-arm
-Description: Bypass Total, Anti-Blacklist e Modo Streamer (Invisível em Gravações)
+Description: Menu VIP com Abas (Combate, ESP, Config), Modo Streamer e Bypass Total.
 Maintainer: Gomes (@eoo_gomes3)
 Author: Space Xit
 Section: Tweaks
-v
