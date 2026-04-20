@@ -19,6 +19,7 @@
         instance.windowLevel = UIWindowLevelStatusBar + 100.0;
         instance.backgroundColor = [UIColor clearColor];
         instance.hidden = YES;
+        // MODO STREAMER: Oculto em gravações
         if ([instance respondsToSelector:@selector(setScreenRecordingDetached:)]) {
             [instance setValue:@(YES) forKey:@"screenRecordingDetached"];
         }
@@ -37,13 +38,7 @@
     self.mainPanel.layer.borderColor = [UIColor cyanColor].CGColor;
     [self addSubview:self.mainPanel];
 
-    UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(0, 5, 400, 25)];
-    title.text = @"SPACE XIT - SUPREME MENU";
-    title.textColor = [UIColor cyanColor];
-    title.textAlignment = NSTextAlignmentCenter;
-    title.font = [UIFont boldSystemFontOfSize:16];
-    [self.mainPanel addSubview:title];
-
+    // Abas
     NSArray *tabs = @[@"COMBATE", @"ESP", @"CONFIG"];
     for (int i = 0; i < tabs.count; i++) {
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -105,7 +100,7 @@
 
 - (void)showConfig {
     UITextView *txt = [[UITextView alloc] initWithFrame:CGRectMake(10, 5, 360, 150)];
-    txt.text = @"SPACE XIT - OFICIAL\nCONTATO: @eoo_gomes3\n\n1. Ative as funções no lobby.\n2. Slider configura o FOV do Aimbot.\n3. Modo Streamer Ativo (Oculto em vídeos).";
+    txt.text = @"SPACE XIT - OFICIAL\nCONTATO: @eoo_gomes3\n\nBYPASS DE LOGIN ATIVO\nVERSÃO SUPREMA 1.123.1";
     txt.textColor = [UIColor cyanColor];
     txt.backgroundColor = [UIColor clearColor];
     txt.editable = NO;
@@ -125,6 +120,7 @@
 
 %ctor {
     [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+        // Bypass de 25 segundos para segurança
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitMenu sharedInstance] action:@selector(toggle)];
             tap.numberOfTouchesRequired = 3; tap.numberOfTapsRequired = 3;
