@@ -1,41 +1,34 @@
-name: SpaceXit_V4_Build
-on: [push, workflow_dispatch]
 
+name: Compilar SucSoft iOS
+on: [push]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup
+      - name: Instalar Dependencias
+        run: brew install ldid dpkg
+
+      - name: Corrigir Formato Unix
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential git dpkg-dev xz-utils
-          sudo curl -kL "https://github.com/theos/binaries/raw/master/linux/x86_64/ldid" -o /usr/local/bin/ldid
-          sudo chmod +x /usr/local/bin/ldid
+          sed -i '' 's/\r$//' control
+          chmod 644 control
+      - name: Preparar Theos
+        run: |
           git clone --recursive https://github.com/theos/theos.git ~/theos
-
-      - name: Baixar SDK (Link Blindado)
-        run: |
-          mkdir -p ~/theos/sdks
-          # Usando o servidor do Dhowett que é o mais estável do mundo
-          curl -kL "https://github.com/Dhowett/Theos-SDKs/raw/master/iPhoneOS14.5.sdk.tar.xz" -o ~/theos/sdks/sdk.tar.xz
-          
-          # Verifica se o arquivo tem mais de 1MB (pra ter certeza que não é erro 404)
-          FILESIZE=$(stat -c%s "~/theos/sdks/sdk.tar.xz")
-          if [ $FILESIZE -lt 1000000 ]; then echo "ERRO: O SDK baixou errado (404). Tentando link reserva..."; curl -kL "https://bit.ly/sdkiOS145" -o ~/theos/sdks/sdk.tar.xz; fi
-          
-          cd ~/theos/sdks/
-          tar -xf sdk.tar.xz && rm sdk.tar.xz
-
-      - name: Compilar dylib
+          curl -LO https://github.com/theos/sdks/archive/master.zip
+          unzip master.zip -d ~/theos/sdks
+          mv ~/theos/sdks/sdks-master/* ~/theos/sdks
+          echo "THEOS=~/theos" >> $GITHUB_ENV
+      - name: Compilar Dylib
         run: |
           export THEOS=~/theos
-          export PATH=$THEOS/bin:$PATH
-          make clean package FINALPACKAGE=1
-
-      - name: Link de Download
-        run: |
-          echo "LINK DA SUA DYLIB:"
-          curl --upload-file packages/*.deb https://transfer.sh/SpaceXitV4.deb
+          make package FINALPACKAGE=1
+          
+      - name: Upload do Resultado
+        uses: actions/upload-artifact@v4
+        with:
+          name: SucSoft-Final-Gomes
+          path: packages/*.deb
