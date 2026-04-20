@@ -1,8 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <substrate.h>
 
-// --- INTERFACE DO MENU SPACE XIT ---
-@interface SpaceXitMenu : UIWindow
+@interface SpaceXitMenuV4 : UIWindow
 @property (nonatomic, strong) UIView *mainPanel;
 @property (nonatomic, strong) UIView *contentArea;
 @property (nonatomic, strong) UILabel *sliderValueLabel;
@@ -10,18 +9,16 @@
 - (void)toggle;
 @end
 
-@implementation SpaceXitMenu
+@implementation SpaceXitMenuV4
 
 + (instancetype)sharedInstance {
-    static SpaceXitMenu *instance = nil;
+    static SpaceXitMenuV4 *instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        instance = [[SpaceXitMenu alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        instance = [[SpaceXitMenuV4 alloc] initWithFrame:[UIScreen mainScreen].bounds];
         instance.windowLevel = UIWindowLevelStatusBar + 100.0;
         instance.backgroundColor = [UIColor clearColor];
         instance.hidden = YES;
-        
-        // MODO STREAMER: Oculta o menu de prints e vídeos
         if ([instance respondsToSelector:@selector(setScreenRecordingDetached:)]) {
             [instance setValue:@(YES) forKey:@"screenRecordingDetached"];
         }
@@ -31,25 +28,14 @@
 
 - (void)setupUI {
     if (self.mainPanel) return;
-
-    // Container Principal
     self.mainPanel = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 400, 280)];
     self.mainPanel.center = self.center;
     self.mainPanel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.95];
     self.mainPanel.layer.cornerRadius = 15;
-    self.mainPanel.layer.borderWidth = 2;
     self.mainPanel.layer.borderColor = [UIColor cyanColor].CGColor;
+    self.mainPanel.layer.borderWidth = 2;
     [self addSubview:self.mainPanel];
 
-    // Título
-    UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(0, 5, 400, 25)];
-    title.text = @"SPACE XIT - SUPREME V4";
-    title.textColor = [UIColor cyanColor];
-    title.textAlignment = NSTextAlignmentCenter;
-    title.font = [UIFont boldSystemFontOfSize:16];
-    [self.mainPanel addSubview:title];
-
-    // Sistema de Abas
     NSArray *tabs = @[@"COMBATE", @"ESP", @"CONFIG"];
     for (int i = 0; i < tabs.count; i++) {
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -62,85 +48,67 @@
         [btn addTarget:self action:@selector(switchTab:) forControlEvents:UIControlEventTouchUpInside];
         [self.mainPanel addSubview:btn];
     }
-
-    // Área de Funções
     self.contentArea = [[UIView alloc] initWithFrame:CGRectMake(10, 80, 380, 185)];
-    self.contentArea.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.05];
-    self.contentArea.layer.cornerRadius = 8;
     [self.mainPanel addSubview:self.contentArea];
-    
-    [self showCombate]; // Aba Inicial
+    [self showCombate];
 }
 
-- (void)switchTab:(UIButton *)sender {
+- (void)switchTab:(UIButton *)s {
     for (UIView *v in self.contentArea.subviews) [v removeFromSuperview];
-    if (sender.tag == 0) [self showCombate];
-    else if (sender.tag == 1) [self showESP];
-    else if (sender.tag == 2) [self showConfig];
+    if (s.tag == 0) [self showCombate];
+    else if (s.tag == 1) [self showESP];
+    else if (s.tag == 2) [self showConfig];
 }
 
 - (void)showCombate {
     UILabel *l = [[UILabel alloc] initWithFrame:CGRectMake(15, 10, 200, 30)];
-    l.text = @"ATIVAR AIMBOT"; l.textColor = [UIColor whiteColor];
+    l.text = @"AIMBOT V4"; l.textColor = [UIColor cyanColor];
     [self.contentArea addSubview:l];
-    
     UISwitch *sw = [[UISwitch alloc] initWithFrame:CGRectMake(310, 5, 0, 0)];
-    sw.onTintColor = [UIColor cyanColor];
     [self.contentArea addSubview:sw];
 
     self.sliderValueLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 60, 300, 20)];
-    self.sliderValueLabel.text = @"DISTÂNCIA AIMBOT: 250";
+    self.sliderValueLabel.text = @"FOV DISTÂNCIA: 250";
     self.sliderValueLabel.textColor = [UIColor whiteColor];
     [self.contentArea addSubview:self.sliderValueLabel];
 
     UISlider *sd = [[UISlider alloc] initWithFrame:CGRectMake(15, 85, 350, 30)];
     sd.minimumValue = 0; sd.maximumValue = 500; sd.value = 250;
-    sd.minimumTrackTintColor = [UIColor cyanColor];
     [sd addTarget:self action:@selector(sdChange:) forControlEvents:UIControlEventValueChanged];
     [self.contentArea addSubview:sd];
 }
 
 - (void)showESP {
-    NSArray *esps = @[@"ESP CAIXA", @"ESP ESQUELETO", @"ESP LINHA"];
-    for (int i = 0; i < esps.count; i++) {
-        UILabel *l = [[UILabel alloc] initWithFrame:CGRectMake(15, 10 + (i * 45), 200, 30)];
-        l.text = esps[i]; l.textColor = [UIColor whiteColor];
+    NSArray *items = @[@"LINHA V4", @"BOX V4", @"DISTÂNCIA"];
+    for (int i = 0; i < items.count; i++) {
+        UILabel *l = [[UILabel alloc] initWithFrame:CGRectMake(15, 10 + (i*45), 200, 30)];
+        l.text = items[i]; l.textColor = [UIColor whiteColor];
         [self.contentArea addSubview:l];
-        UISwitch *sw = [[UISwitch alloc] initWithFrame:CGRectMake(310, 10 + (i * 45), 0, 0)];
-        sw.onTintColor = [UIColor greenColor];
+        UISwitch *sw = [[UISwitch alloc] initWithFrame:CGRectMake(310, 10 + (i*45), 0, 0)];
         [self.contentArea addSubview:sw];
     }
 }
 
 - (void)showConfig {
-    UITextView *txt = [[UITextView alloc] initWithFrame:CGRectMake(10, 5, 360, 150)];
-    txt.text = @"SPACE XIT - OFICIAL\nDEV: @eoo_gomes3\n\nSTATUS: 1.123.1 ATUALIZADO\n\nINSTRUÇÕES:\n- Ative no Lobby após os 25s.\n- 3 Cliques com 3 Dedos para abrir.";
-    txt.textColor = [UIColor cyanColor];
-    txt.backgroundColor = [UIColor clearColor];
-    txt.editable = NO;
-    [self.contentArea addSubview:txt];
+    UITextView *t = [[UITextView alloc] initWithFrame:CGRectMake(5, 5, 370, 170)];
+    t.text = @"SPACE XIT V4 - SUPREME\n\nCONTATO: @eoo_gomes3\nVERSÃO JOGO: 1.123.1\n\n- 3 TOQUES COM 3 DEDOS PARA ABRIR.";
+    t.textColor = [UIColor cyanColor]; t.backgroundColor = [UIColor clearColor]; t.editable = NO;
+    [self.contentArea addSubview:t];
 }
 
 - (void)sdChange:(UISlider *)s {
-    self.sliderValueLabel.text = [NSString stringWithFormat:@"DISTÂNCIA AIMBOT: %d", (int)s.value];
+    self.sliderValueLabel.text = [NSString stringWithFormat:@"FOV DISTÂNCIA: %d", (int)s.value];
 }
 
-- (void)toggle {
-    [self setupUI];
-    self.hidden = !self.hidden;
-    if (!self.hidden) [self makeKeyAndVisible];
-}
+- (void)toggle { [self setupUI]; self.hidden = !self.hidden; if (!self.hidden) [self makeKeyAndVisible]; }
 @end
 
-// --- ATIVAÇÃO DO GESTO ---
 %ctor {
-    [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
-        // Bypass de espera para evitar detecção no boot
+    [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *n) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitMenu sharedInstance] action:@selector(toggle)];
-            tap.numberOfTouchesRequired = 3; 
-            tap.numberOfTapsRequired = 3;
-            [[UIApplication sharedApplication].keyWindow addGestureRecognizer:tap];
+            UITapGestureRecognizer *t = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitMenuV4 sharedInstance] action:@selector(toggle)];
+            t.numberOfTouchesRequired = 3; t.numberOfTapsRequired = 3;
+            [[UIApplication sharedApplication].keyWindow addGestureRecognizer:t];
         });
     }];
 }
