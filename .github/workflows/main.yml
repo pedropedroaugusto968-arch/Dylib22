@@ -18,14 +18,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential git lua5.3 liblua5.3-dev libarchive-dev python3
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          curl -kL https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz -o ~/sdk.tar.xz
+          # SDK Fix: Usando link direto e estável
+          curl -LO https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz
           mkdir -p ~/theos/sdks
-          tar -xf ~/sdk.tar.xz -C ~/theos/sdks/
+          tar -xf iPhoneOS14.5.sdk.tar.xz -C ~/theos/sdks/
+          rm iPhoneOS14.5.sdk.tar.xz
 
       - name: Limpar Formato (Anti-Error 25)
         run: |
           sed -i 's/\r$//' control
           sed -i 's/\r$//' Makefile
+          find . -name "*.plist" -exec sed -i 's/\r$//' {} +
           echo "" >> control
 
       - name: Compilar
@@ -35,8 +38,8 @@ jobs:
           make clean
           make package FINALPACKAGE=1
 
-      - name: Upload (Versão v4)
+      - name: Upload Artifacts (v4)
         uses: actions/upload-artifact@v4
         with:
-          name: SpaceXit-Premium
+          name: SpaceXit-Premium-Pack
           path: packages/*.deb
