@@ -2,7 +2,6 @@
 #import <substrate.h>
 #import <mach-o/dyld.h>
 
-// --- ESTRUTURA DO MENU ---
 @interface SpaceXitV4 : UIWindow
 @property (nonatomic, strong) UIView *menuBg;
 + (instancetype)sharedInstance;
@@ -10,13 +9,13 @@
 @end
 
 @implementation SpaceXitV4
-// Singleton para economizar memória
 + (instancetype)sharedInstance {
     static SpaceXitV4 *inst = nil;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         inst = [[SpaceXitV4 alloc] initWithFrame:[UIScreen mainScreen].bounds];
         inst.windowLevel = UIWindowLevelStatusBar + 1.0;
+        inst.backgroundColor = [UIColor clearColor];
         inst.hidden = YES;
     });
     return inst;
@@ -28,59 +27,60 @@
 }
 @end
 
-// --- FUNÇÕES DE BYPASS ANTI-BAN ---
+// --- BYPASS ANTI-BAN E ANTI-BLACKLIST ---
 
-// 1. Bloqueio de Blacklist (Impede o jogo de ler o ID do dispositivo real)
+// 1. Ocultação de ID do Aparelho (Anti-Blacklist)
 %hook UIDevice
 - (NSString *)identifierForVendor {
-    // Retorna um ID falso para evitar que o banimento atinja o aparelho (HWID Bypass)
-    return @"A1B2C3D4-E5F6-7G8H-9I0J-K1L2M3N4O5P6";
+    return @"B4C3D2A1-F6E5-4D3C-B2A1-0987654321AB"; // ID Falso para evitar ban de hardware
 }
 %end
 
-// 2. Anti-Rastreio de Memória (Hooks silenciosos)
-// Bloqueia a detecção de depuradores que a Garena usa para achar a dylib
+// 2. Bloqueio de Rastreio de Depuração (Anti-Ban)
 %hookf(int, ptrace, int request, pid_t pid, caddr_t addr, int data) {
-    if (request == 31) { // PT_DENY_ATTACH
-        return 0; // Diz ao jogo que não há nada anexado
-    }
+    if (request == 31) return 0; // PT_DENY_ATTACH: Engana o sistema de detecção da Garena
     return %orig;
 }
 
-// 3. Limpeza de Logs de Denúncia (Anti-Report)
+// 3. Limpeza Automática de Logs (Anti-Report)
 %hook NSFileManager
-- (BOOL)removeItemAtPath:(NSString *)path error:(NSError **)error {
-    // Se o jogo tentar criar um relatório de crash ou log de "suspeito", nós limpamos
-    if ([path containsString:@"GarenaLog"] || [path containsString:@"tdf"]) {
-        return YES; 
+- (BOOL)createFileAtPath:(NSString *)path contents:(NSData *)data attributes:(NSDictionary *)attr {
+    if ([path containsString:@"GarenaLog"] || [path containsString:@"crash_report"] || [path containsString:@"tdf"]) {
+        return NO; // Impede o jogo de salvar provas do uso de script
     }
     return %orig;
 }
 %end
 
-// --- INJEÇÃO SEGURA NO LOBBY ---
+// --- INJEÇÃO MODERNA (CORRIGE ERRO DO GITHUB) ---
 %ctor {
-    // Delay de 75 segundos para garantir estabilidade total (Bypass de login)
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(75 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(80 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         
-        // 3 cliques com 3 dedos para abrir o menu manualmente
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitV4 sharedInstance] action:@selector(abrirFechar)];
         tap.numberOfTouchesRequired = 3;
         tap.numberOfTapsRequired = 3;
 
-        UIWindow *win = nil;
+        UIWindow *activeWindow = nil;
+        // Lógica moderna para evitar o erro 'keyWindow is deprecated'
         if (@available(iOS 13.0, *)) {
-            for (UIWindowScene *s in [UIApplication sharedApplication].connectedScenes) {
-                if (s.activationState == UISceneActivationStateForegroundActive) {
-                    win = s.windows.firstObject; break;
+            for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
+                if (scene.activationState == UISceneActivationStateForegroundActive) {
+                    for (UIWindow *window in scene.windows) {
+                        if (window.isKeyWindow) {
+                            activeWindow = window;
+                            break;
+                        }
+                    }
                 }
             }
         }
-        if (!win) win = [UIApplication sharedApplication].keyWindow;
         
-        [win addGestureRecognizer:tap];
-        
-        // Anti-Detecção de módulo: Esconde a dylib da lista de carregamento
-        unsetenv("DYLD_INSERT_LIBRARIES");
+        if (!activeWindow) activeWindow = [UIApplication sharedApplication].windows.firstObject;
+
+        if (activeWindow) {
+            [activeWindow addGestureRecognizer:tap];
+            // Remove vestígios da injeção da memória
+            unsetenv("DYLD_INSERT_LIBRARIES");
+        }
     });
 }
