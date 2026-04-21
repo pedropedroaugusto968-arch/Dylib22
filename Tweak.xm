@@ -1,85 +1,62 @@
 #import <UIKit/UIKit.h>
 #import <substrate.h>
 
-// Variáveis para o Mini Menu
-static bool legitActive = false;
-static bool neckActive = false;
-static bool chestActive = false;
+// Estados do Inject
+static bool legit_active = false;
+static bool neck_active = false;
 
-@interface SpaceXitMini : UIView
-@property (nonatomic, strong) UIView *panel;
-+ (instancetype)shared;
-- (void)toggle;
+@interface SpaceXitV4 : UIView
+@property (nonatomic, strong) UIView *p;
++ (instancetype)s;
+- (void)t;
 @end
 
-@implementation SpaceXitMini
-+ (instancetype)shared {
-    static SpaceXitMini *inst = nil;
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{
-        inst = [[SpaceXitMini alloc] initWithFrame:[UIScreen mainScreen].bounds];
-        inst.userInteractionEnabled = YES;
+@implementation SpaceXitV4
++ (instancetype)s {
+    static SpaceXitV4 *i = nil;
+    static dispatch_once_t o;
+    dispatch_once(&o, ^{
+        i = [[SpaceXitV4 alloc] initWithFrame:[UIScreen mainScreen].bounds];
     });
-    return inst;
+    return i;
 }
-
-- (void)setupMenu {
-    if (self.panel) return;
-    self.panel = [[UIView alloc] initWithFrame:CGRectMake(20, 60, 160, 150)];
-    self.panel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.8];
-    self.panel.layer.cornerRadius = 10;
-    [self addSubview:self.panel];
-
-    UIButton *btn = [UIButton buttonWithType:UIButtonTypeSystem];
-    btn.frame = CGRectMake(10, 40, 140, 30);
-    [btn setTitle:@"LEGIT CAPA" forState:UIControlStateNormal];
-    [btn addTarget:self action:@selector(action1) forControlEvents:UIControlEventTouchUpInside];
-    [self.panel addSubview:btn];
+- (void)setup {
+    if (self.p) return;
+    self.p = [[UIView alloc] initWithFrame:CGRectMake(40, 80, 150, 100)];
+    self.p.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.8];
+    self.p.layer.cornerRadius = 10;
+    [self addSubview:self.p];
+    
+    UIButton *b = [UIButton buttonWithType:UIButtonTypeSystem];
+    b.frame = CGRectMake(10, 30, 130, 30);
+    [b setTitle:@"LEGIT ON" forState:UIControlStateNormal];
+    [b addTarget:self action:@selector(toggle) forControlEvents:UIControlEventTouchUpInside];
+    [self.p addSubview:b];
 }
-
-- (void)action1 { legitActive = !legitActive; }
-- (void)toggle { [self setupMenu]; self.hidden = !self.hidden; }
+- (void)toggle { legit_active = !legit_active; }
+- (void)t { [self setup]; self.hidden = !self.hidden; }
 @end
 
-// --- HOOKS (Onde o %orig faz sentido) ---
-
+// --- ANTI-CRASH LOGIN ---
 %hook UIApplication
-- (bool)canOpenURL:(NSURL *)url {
-    // Anti-Crash Login: Permite Google/FB
-    if ([[url absoluteString] containsString:@"fb"] || [[url absoluteString] containsString:@"google"]) {
-        return true;
-    }
-    return %orig; // AQUI o %orig funciona corretamente
+- (bool)canOpenURL:(NSURL *)u {
+    if ([[u absoluteString] containsString:@"fb"] || [[u absoluteString] containsString:@"google"]) return true;
+    return %orig;
 }
 %end
 
-// --- AUXÍLIO DE MIRA INJECT ---
-
-float (*orig_aim)(void *instance);
-float get_aim(void *instance) {
-    if (legitActive) return 4.5f;
-    if (neckActive) return 7.0f;
-    return 1.0f; // Retorno padrão caso nada esteja ativo
-}
-
-// --- CONSTRUTOR ---
-
+// --- INJECT ---
 %ctor {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 15 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        
-        // Ativa o gesto de 2 toques / 2 dedos para o mini menu
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitMini shared] action:@selector(toggle)];
-        tap.numberOfTouchesRequired = 2;
-        tap.numberOfTapsRequired = 2;
-
-        UIWindow *win = [UIApplication sharedApplication].keyWindow;
-        if (!win) win = [UIApplication sharedApplication].windows.firstObject;
-        
-        if (win) {
-            [win addSubview:[SpaceXitMini shared]];
-            [win addGestureRecognizer:tap];
+        UITapGestureRecognizer *g = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitV4 s] action:@selector(t)];
+        g.numberOfTouchesRequired = 2;
+        g.numberOfTapsRequired = 2;
+        UIWindow *w = [UIApplication sharedApplication].keyWindow;
+        if (!w) w = [UIApplication sharedApplication].windows.firstObject;
+        if (w) {
+            [w addSubview:[SpaceXitV4 s]];
+            [w addGestureRecognizer:g];
         }
-        
         unsetenv("DYLD_INSERT_LIBRARIES");
     });
 }
