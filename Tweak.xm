@@ -1,12 +1,12 @@
 #import <UIKit/UIKit.h>
 #import <substrate.h>
 
-// Variáveis de controle
-static bool is_logged_in = false;
+static bool legit_on = false;
 
 @interface SpaceXitV4 : UIView
-@property (nonatomic, strong) UIView *panel;
+@property (nonatomic, strong) UIView *bg;
 + (instancetype)shared;
+- (void)show;
 @end
 
 @implementation SpaceXitV4
@@ -18,56 +18,62 @@ static bool is_logged_in = false;
     });
     return inst;
 }
-// (O restante do código do seu mini painel entra aqui)
-@end
 
-// --- SISTEMA ANTI-TRAVAMENTO ---
-
-%hook UIApplication
-// 1. Evita que o jogo trave ao abrir janelas externas de login (Google/FB)
-- (bool)canOpenURL:(NSURL *)url {
-    NSString *u = [url absoluteString];
-    if ([u containsString:@"fb"] || [u containsString:@"google"] || [u containsString:@"garena"]) {
-        return true; 
-    }
-    return %orig;
+- (void)setup {
+    if (self.bg) return;
+    self.bg = [[UIView alloc] initWithFrame:CGRectMake(50, 100, 140, 80)];
+    self.bg.backgroundColor = [UIColor colorWithWhite:0 alpha:0.8];
+    self.bg.layer.cornerRadius = 12;
+    [self addSubview:self.bg];
+    
+    UIButton *btn = [UIButton buttonWithType:UIButtonTypeSystem];
+    btn.frame = CGRectMake(10, 25, 120, 30);
+    [btn setTitle:@"LEGIT ON" forState:UIControlStateNormal];
+    [btn setTitleColor:[UIColor greenColor] forState:UIControlStateNormal];
+    [btn addTarget:self action:@selector(click) forControlEvents:UIControlEventTouchUpInside];
+    [self.bg addSubview:btn];
 }
 
-// 2. Garante que o processo de login receba prioridade total da CPU
-- (void)openURL:(NSURL*)url options:(NSDictionary<NSString *,id> *)options completionHandler:(void (^)(BOOL success))completion {
-    %orig(url, options, completion);
+- (void)click { 
+    legit_on = !legit_on; 
+    [(UIButton *)[self.bg subviews][0] setTitleColor:(legit_on ? [UIColor redColor] : [UIColor greenColor]) forState:UIControlStateNormal];
+}
+
+- (void)show { [self setup]; self.hidden = !self.hidden; }
+@end
+
+%hook UIApplication
+- (bool)canOpenURL:(NSURL *)url {
+    if ([[url absoluteString] containsString:@"fb"] || [[url absoluteString] containsString:@"google"]) return true;
+    return %orig;
 }
 %end
 
-// --- INJETOR INTELIGENTE ---
-
-void InjetarScripts() {
-    if (is_logged_in) return;
-    
-    // Aqui você coloca seus MSHookFunction
-    // MSHookFunction((void *)0xOFFSET, ...);
-    
-    is_logged_in = true;
-    NSLog(@"[SpaceXit] Scripts injetados com sucesso após login.");
-}
-
 %ctor {
-    // O segredo do Anti-Crash:
-    // Aguarda o jogo carregar completamente a interface (25 segundos)
-    // Isso dá tempo de você digitar sua senha e entrar sem lag.
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 25 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 20 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         
-        // Limpa rastro de injeção para o Anti-Cheat não travar o login
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitV4 shared] action:@selector(show)];
+        tap.numberOfTouchesRequired = 2;
+        tap.numberOfTapsRequired = 2;
+        
+        UIWindow *win = nil;
+        // Método seguro para iOS 13 até iOS 18
+        if (@available(iOS 13.0, *)) {
+            for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
+                if (scene.activationState == UISceneActivationStateForegroundActive) {
+                    win = scene.windows.firstObject;
+                    break;
+                }
+            }
+        }
+        if (!win) win = [UIApplication sharedApplication].keyWindow;
+        
+        if (win) {
+            [win addSubview:[SpaceXitV4 shared]];
+            [win addGestureRecognizer:tap];
+            [SpaceXitV4 shared].hidden = YES;
+        }
+        
         unsetenv("DYLD_INSERT_LIBRARIES");
-
-        UIWindow *window = [UIApplication sharedApplication].keyWindow;
-        if (!window && @available(iOS 13.0, *)) {
-            window = [UIApplication sharedApplication].windows.firstObject;
-        }
-
-        if (window) {
-            [window addSubview:[SpaceXitV4 shared]];
-            InjetarScripts();
-        }
     });
 }
