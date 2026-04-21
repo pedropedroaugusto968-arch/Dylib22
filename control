@@ -1,8 +1,9 @@
-Package: com.spacexit.v4
+Package: com.pedropedro.spacexitv4
 Name: SpaceXitV4
-Depends: mobilesubstrate
-Version: 4.0.0
+Depends: 
 Architecture: iphoneos-arm
-Description: Menu VIP V4 Profissional - Dev @eoo_gomes3.
-Maintainer: Gomes (@eoo_gomes3)
-Author: Space Xit
+Description: Mini Painel Inject Legit para Free Fire
+Maintainer: @eoo_gomes3
+Author: pedropedroaugusto968
+Section: Tweaks
+Version: 4.0
