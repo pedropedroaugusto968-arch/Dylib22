@@ -1,9 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <substrate.h>
 
-// Estados do Inject
 static bool legit_active = false;
-static bool neck_active = false;
 
 @interface SpaceXitV4 : UIView
 @property (nonatomic, strong) UIView *p;
@@ -28,8 +26,9 @@ static bool neck_active = false;
     [self addSubview:self.p];
     
     UIButton *b = [UIButton buttonWithType:UIButtonTypeSystem];
-    b.frame = CGRectMake(10, 30, 130, 30);
-    [b setTitle:@"LEGIT ON" forState:UIControlStateNormal];
+    b.frame = CGRectMake(10, 35, 130, 30);
+    [b setTitle:@"LEGIT ON/OFF" forState:UIControlStateNormal];
+    [b setTitleColor:[UIColor cyanColor] forState:UIControlStateNormal];
     [b addTarget:self action:@selector(toggle) forControlEvents:UIControlEventTouchUpInside];
     [self.p addSubview:b];
 }
@@ -37,7 +36,6 @@ static bool neck_active = false;
 - (void)t { [self setup]; self.hidden = !self.hidden; }
 @end
 
-// --- ANTI-CRASH LOGIN ---
 %hook UIApplication
 - (bool)canOpenURL:(NSURL *)u {
     if ([[u absoluteString] containsString:@"fb"] || [[u absoluteString] containsString:@"google"]) return true;
@@ -45,14 +43,23 @@ static bool neck_active = false;
 }
 %end
 
-// --- INJECT ---
 %ctor {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 15 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         UITapGestureRecognizer *g = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitV4 s] action:@selector(t)];
         g.numberOfTouchesRequired = 2;
         g.numberOfTapsRequired = 2;
-        UIWindow *w = [UIApplication sharedApplication].keyWindow;
+        
+        UIWindow *w = nil;
+        if (@available(iOS 13.0, *)) {
+            for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
+                if (scene.activationState == UISceneActivationStateForegroundActive) {
+                    w = scene.windows.firstObject;
+                    break;
+                }
+            }
+        }
         if (!w) w = [UIApplication sharedApplication].windows.firstObject;
+        
         if (w) {
             [w addSubview:[SpaceXitV4 s]];
             [w addGestureRecognizer:g];
