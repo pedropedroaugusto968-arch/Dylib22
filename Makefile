@@ -1,14 +1,7 @@
-# Nome do projeto
-TWEAK_NAME = SpaceXitV4
+TWEAK_NAME = AntiCrashSpace
+AntiCrashSpace_FILES = Tweak.xm
+AntiCrashSpace_CFLAGS = -fobjc-arc -O2
 
-# Arquivos e Otimização
-SpaceXitV4_FILES = Tweak.xm
-SpaceXitV4_CFLAGS = -fobjc-arc -O3
-
-# Flags de Linkagem para Bypass e Estabilidade
-SpaceXitV4_LDFLAGS = -lsqlite3 -lz
-
-# Configurações de Arquitetura e Target
 export ARCHS = arm64
 export TARGET = iphone:clang:latest:14.0
 export THEOS_PACKAGE_SCHEME = rootless
