@@ -1,95 +1,86 @@
 #import <UIKit/UIKit.h>
 #import <substrate.h>
+#import <mach-o/dyld.h>
 
+// --- ESTRUTURA DO MENU ---
 @interface SpaceXitV4 : UIWindow
-@property (nonatomic, strong) UIView *mainPanel;
+@property (nonatomic, strong) UIView *menuBg;
 + (instancetype)sharedInstance;
-- (void)toggle;
+- (void)abrirFechar;
 @end
 
 @implementation SpaceXitV4
-
+// Singleton para economizar memória
 + (instancetype)sharedInstance {
-    static SpaceXitV4 *instance = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        // O menu só ganha tamanho e memória aqui, quando for chamado
-        instance = [[SpaceXitV4 alloc] initWithFrame:[UIScreen mainScreen].bounds];
-        instance.windowLevel = UIWindowLevelStatusBar + 100.0;
-        instance.backgroundColor = [UIColor clearColor];
-        instance.hidden = YES;
-        
-        // Anti-Rastreio: Esconde da gravação de tela
-        if ([instance respondsToSelector:@selector(setScreenRecordingDetached:)]) {
-            [instance setValue:@(YES) forKey:@"screenRecordingDetached"];
-        }
+    static SpaceXitV4 *inst = nil;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        inst = [[SpaceXitV4 alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        inst.windowLevel = UIWindowLevelStatusBar + 1.0;
+        inst.hidden = YES;
     });
-    return instance;
+    return inst;
 }
 
-- (void)setupUI {
-    if (self.mainPanel) return;
-    
-    // Criando o painel de forma otimizada
-    self.mainPanel = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 350, 220)];
-    self.mainPanel.center = self.center;
-    self.mainPanel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.85];
-    self.mainPanel.layer.cornerRadius = 15;
-    self.mainPanel.layer.borderColor = [UIColor cyanColor].CGColor;
-    self.mainPanel.layer.borderWidth = 1.0;
-    [self addSubview:self.mainPanel];
-
-    UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(0, 10, 350, 30)];
-    title.text = @"SPACE XIT V4 - LOBBY ACTIVE";
-    title.textColor = [UIColor cyanColor];
-    title.textAlignment = NSTextAlignmentCenter;
-    title.font = [UIFont boldSystemFontOfSize:16];
-    [self.mainPanel addSubview:title];
-}
-
-- (void)toggle {
-    [self setupUI];
+- (void)abrirFechar {
     self.hidden = !self.hidden;
     if (!self.hidden) [self makeKeyAndVisible];
 }
 @end
 
-// --- LÓGICA DE INJEÇÃO SEM TRAVAMENTO ---
+// --- FUNÇÕES DE BYPASS ANTI-BAN ---
 
-%ctor {
-    // 1. O Tweak inicia "morto". Não faz nada por 80 segundos.
-    // Isso evita o lag no carregamento da Garena e na tela de login.
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(80 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitV4 sharedInstance] action:@selector(toggle)];
-        tap.numberOfTouchesRequired = 3;
-        tap.numberOfTapsRequired = 3;
+// 1. Bloqueio de Blacklist (Impede o jogo de ler o ID do dispositivo real)
+%hook UIDevice
+- (NSString *)identifierForVendor {
+    // Retorna um ID falso para evitar que o banimento atinja o aparelho (HWID Bypass)
+    return @"A1B2C3D4-E5F6-7G8H-9I0J-K1L2M3N4O5P6";
+}
+%end
 
-        // 2. Procura a janela de forma segura apenas UMA VEZ
-        UIWindow *targetWin = nil;
-        if (@available(iOS 13.0, *)) {
-            for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
-                if (scene.activationState == UISceneActivationStateForegroundActive) {
-                    targetWin = scene.windows.firstObject;
-                    break;
-                }
-            }
-        }
-        if (!targetWin) targetWin = [UIApplication sharedApplication].keyWindow;
-
-        if (targetWin) {
-            [targetWin addGestureRecognizer:tap];
-            
-            // Pequeno feedback visual discreto (opcional) para saber que o bypass ativou
-            NSLog(@"[SpaceXit] Bypass Loaded Successfully");
-        }
-    });
+// 2. Anti-Rastreio de Memória (Hooks silenciosos)
+// Bloqueia a detecção de depuradores que a Garena usa para achar a dylib
+%hookf(int, ptrace, int request, pid_t pid, caddr_t addr, int data) {
+    if (request == 31) { // PT_DENY_ATTACH
+        return 0; // Diz ao jogo que não há nada anexado
+    }
+    return %orig;
 }
 
-// 3. Anti-Crash de Logs (Silencioso para não pesar a CPU)
+// 3. Limpeza de Logs de Denúncia (Anti-Report)
 %hook NSFileManager
-- (BOOL)createFileAtPath:(NSString *)path contents:(NSData *)data attributes:(NSDictionary *)attr {
-    if ([path containsString:@"GarenaLog"] || [path containsString:@"crash_report"]) return NO;
+- (BOOL)removeItemAtPath:(NSString *)path error:(NSError **)error {
+    // Se o jogo tentar criar um relatório de crash ou log de "suspeito", nós limpamos
+    if ([path containsString:@"GarenaLog"] || [path containsString:@"tdf"]) {
+        return YES; 
+    }
     return %orig;
 }
 %end
+
+// --- INJEÇÃO SEGURA NO LOBBY ---
+%ctor {
+    // Delay de 75 segundos para garantir estabilidade total (Bypass de login)
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(75 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        
+        // 3 cliques com 3 dedos para abrir o menu manualmente
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:[SpaceXitV4 sharedInstance] action:@selector(abrirFechar)];
+        tap.numberOfTouchesRequired = 3;
+        tap.numberOfTapsRequired = 3;
+
+        UIWindow *win = nil;
+        if (@available(iOS 13.0, *)) {
+            for (UIWindowScene *s in [UIApplication sharedApplication].connectedScenes) {
+                if (s.activationState == UISceneActivationStateForegroundActive) {
+                    win = s.windows.firstObject; break;
+                }
+            }
+        }
+        if (!win) win = [UIApplication sharedApplication].keyWindow;
+        
+        [win addGestureRecognizer:tap];
+        
+        // Anti-Detecção de módulo: Esconde a dylib da lista de carregamento
+        unsetenv("DYLD_INSERT_LIBRARIES");
+    });
+}
